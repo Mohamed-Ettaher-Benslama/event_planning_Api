@@ -11,7 +11,7 @@ class EventSubscription (db.Model):
 
     @classmethod
     def get_subscription_by_id(cls, user_id, event_id):
-        return cls.query.filter_by(userid=user_id).first()
+        return cls.query.filter_by(userid=user_id, eventid=event_id).first()
 
     def save(self):
         db.session.add(self)

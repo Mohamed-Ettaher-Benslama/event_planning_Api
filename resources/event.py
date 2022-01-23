@@ -1,10 +1,10 @@
 from flask import request
 from datetime import datetime
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models.event import Event
 from http import HTTPStatus
+import re
 
 
 class ListEventResource(Resource):
@@ -21,7 +21,7 @@ class ListEventResource(Resource):
             }
             response.append(data)
 
-        return {"data":response}, HTTPStatus.OK
+        return {"data": response}, HTTPStatus.OK
 
     @jwt_required()
     def post(self):
@@ -29,11 +29,15 @@ class ListEventResource(Resource):
         role = current_user['role']
         if role == 'ADMIN':
             event_data = request.get_json()
+            try:
+                date = datetime.strptime(event_data['date'], "%m/%d/%Y, %H:%M")
+            except ValueError as err:
+                return {'Message': 'Invalid Date format'}, HTTPStatus.BAD_REQUEST
             event = Event(
                 name=event_data['name'],
                 description=event_data["description"],
                 ticket_price=event_data["ticket_price"],
-                date=datetime.strptime(event_data['date'],"%m/%d/%Y, %H:%M")
+                date=date
             )
             event.save()
             return {'Message': 'Event Added Successfully'}, HTTPStatus.OK
@@ -41,18 +45,19 @@ class ListEventResource(Resource):
             return {'Message': 'Unauthorized acess'}, HTTPStatus.UNAUTHORIZED
 
 
-class EventHandlingResource (Resource):
+class EventHandlingResource(Resource):
     @jwt_required()
     def delete(self, id):
-        # id, username , email , role
         identity = get_jwt_identity()
-        role=identity['role']
-        if role=='ADMIN':
-            event=Event.get_by_id(id)
+        role = identity['role']
+        if role == 'ADMIN':
+            event = Event.get_by_id(id)
+            if event is None:
+                return {'Message': 'Event Not found'}, HTTPStatus.NOT_FOUND
             event.delete()
-            return {'Message':'Event deleted sucessfuly'},HTTPStatus.OK
+            return {'Message': 'Event deleted successfully'}, HTTPStatus.OK
         else:
-            return {'Message':'Unauthorized acess'},HTTPStatus.UNAUTHORIZED
+            return {'Message': 'Unauthorized access'}, HTTPStatus.UNAUTHORIZED
 
     @jwt_required()
     def get(self, id):
@@ -72,18 +77,21 @@ class EventHandlingResource (Resource):
         if role == 'ADMIN':
             event = Event.get_by_id(id)
             data = request.get_json()
+            if data.get("date") is not None:
+                try:
+                    event.name = datetime.strptime(data.get("date"), "%m/%d/%Y, %H:%M")
+                except ValueError as err:
+                    return {'Message': 'Invalid Date format'}, HTTPStatus.BAD_REQUEST
             if data.get("name") is not None:
                 event.name = data.get("name")
             if data.get("description") is not None:
                 event.name = data.get("description")
             if data.get("ticket_price") is not None:
                 event.name = data["ticket_price"]
-            if data.get("date") is not None:
-                event.name = datetime.strptime(data.get("date"), "%m/%d/%Y, %H:%M")
             event.save()
-            return {'Message': 'Event with id '+str(id)+' Updatede Successfully'}, HTTPStatus.OK
+            return {'Message': 'Event with id ' + str(id) + ' Updated Successfully'}, HTTPStatus.OK
         else:
-            return {'Message': 'Unauthorized acess'}, HTTPStatus.UNAUTHORIZED
+            return {'Message': 'Unauthorized access'}, HTTPStatus.UNAUTHORIZED
 
 
 class EventByNameResource(Resource):
@@ -100,7 +108,3 @@ class EventByNameResource(Resource):
             }
             response.append(data)
         return {'data': response}, HTTPStatus.OK
-
-
-
-

@@ -4,10 +4,12 @@ from flask_restful import Api
 from config import Config
 from extention import db, jwt
 from utils import hash_password
+from http import HTTPStatus
 
 from resources.user import UserListResource, UserResource, MeResource, UserUpdateResource, AdminResource
 from resources.jwt import TokenRessource, RefreshResource, RevokeResource, black_list
 from resources.event import ListEventResource, EventHandlingResource, EventByNameResource
+from resources.subscription import SubscriptionHandlingResource, ListSubscriptionsResource
 
 
 def create_app():
@@ -19,7 +21,7 @@ def create_app():
 
 
 def register_extensions(app):
-    db.app=app
+    db.app = app
     db.init_app(app)
     migrate = Migrate(app, db)
     jwt.init_app(app)
@@ -27,12 +29,8 @@ def register_extensions(app):
     @jwt.token_in_blocklist_loader
     def check_if_token_in_blacklist(_, decrypted_token):
         jti = decrypted_token['jti']
-        print(jti)
         test = jti in black_list
-        print(test)
         return test
-
-
 
 def register_resources(app):
     api = Api(app)
@@ -45,10 +43,10 @@ def register_resources(app):
     api.add_resource(RefreshResource, "/refresh")
     api.add_resource(RevokeResource, '/revoke')
     api.add_resource(ListEventResource, '/events')
+    api.add_resource(ListSubscriptionsResource, '/subscription')
+    api.add_resource(SubscriptionHandlingResource, '/subscription/<int:event_id>')
     api.add_resource(EventHandlingResource, '/events/<int:id>')
     api.add_resource(EventByNameResource, '/events/<string:name>')
-
-
 
 
 if __name__ == '__main__':

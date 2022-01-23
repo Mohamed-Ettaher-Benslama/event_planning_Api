@@ -9,8 +9,11 @@ from flask_jwt_extended import (
     get_jti)
 from utils import verify_hash
 from models.user import User
+import re
 
 black_list = set()
+
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
 
 class TokenRessource(Resource):
@@ -18,17 +21,13 @@ class TokenRessource(Resource):
     def post(self):
 
         json_data = request.get_json()
-
-        print(json_data)
-
         email = json_data.get('email')
         password = json_data.get('password')
-
+        if not re.fullmatch(regex, email):
+            return {'Message': 'Email not valid'}, HTTPStatus.BAD_REQUEST
         user = User.get_by_email(email=email)
-
         if not user or not verify_hash(password, user.password):
             return {'message': 'username or password is incorrect'}, HTTPStatus.UNAUTHORIZED
-
         data = {
             'id': user.id,
             'username': user.username,

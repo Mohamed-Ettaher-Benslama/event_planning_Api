@@ -3,23 +3,25 @@ from flask_restful import Resource
 from http import HTTPStatus
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import  get_jwt_identity, jwt_required
-
+import re
 
 from utils import hash_password
 from models.user import User
+
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
 
 class UserListResource(Resource):
 
     def post(self):
         json_data = request.get_json()
-
         username = json_data.get('username')
         email = json_data.get('email')
-        non_hash_password=json_data.get('password')
-
+        non_hash_password = json_data.get('password')
         if username is None or email is None or non_hash_password is None:
-            return {'Message': 'Credentials are not valide'}, HTTPStatus.BAD_REQUEST
+            return {'Message': 'Credentials are not valid'}, HTTPStatus.BAD_REQUEST
+        if not re.fullmatch(regex, email):
+            return {'Message': 'Email not valid'}, HTTPStatus.BAD_REQUEST
 
         if User.get_by_username(username):
             return {'message': 'email already used'}, HTTPStatus.BAD_REQUEST
@@ -76,7 +78,7 @@ class UserResource(Resource):
 class MeResource(Resource):
     @jwt_required()
     def get(self):
-        user = User.get_by_id(id=get_jwt_identity()["id"])
+        user = User.get_by_id(id=get_jwt_identity()['id'])
         data = {
             'id': user.id,
             'username': user.username,
@@ -89,12 +91,13 @@ class UserUpdateResource(Resource):
     @jwt_required()
     def put(self):
         data = request.get_json()
-        # data contains : username, email, password
         current_user_id = get_jwt_identity()["id"]
-        current_user : User = User.get_by_id(current_user_id)
+        current_user: User = User.get_by_id(current_user_id)
         if data["username"] != "":
             current_user.username = data["username"]
         if data["email"] != "":
+            if not re.fullmatch(regex, data["email"]):
+                return {'Message': 'Email not valid'}, HTTPStatus.BAD_REQUEST
             current_user.email = data["email"]
         if data["password"] != "":
             current_user.password = hash_password(data["password"])
@@ -112,15 +115,17 @@ class UserUpdateResource(Resource):
             'access_token': access_token
         }, HTTPStatus.OK
 
-class AdminResource(Resource):
 
+class AdminResource(Resource):
     def post(self):
         json_data = request.get_json()
-
         username = json_data.get('username')
         email = json_data.get('email')
         non_hash_password = json_data.get('password')
-
+        if username is None or email is None or non_hash_password is None:
+            return {'Message': 'Credentials are not valid'}, HTTPStatus.BAD_REQUEST
+        if not re.fullmatch(regex, email):
+            return {'Message': 'Email not valid'}, HTTPStatus.BAD_REQUEST
         if User.get_by_username(username):
             return {'message': 'email already used'}, HTTPStatus.BAD_REQUEST
 
