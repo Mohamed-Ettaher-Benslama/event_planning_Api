@@ -16,7 +16,10 @@ class UserListResource(Resource):
 
         username = json_data.get('username')
         email = json_data.get('email')
-        non_hash_password = json_data.get('password')
+        non_hash_password=json_data.get('password')
+
+        if username is None or email is None or non_hash_password is None:
+            return {'Message': 'Credentials are not valide'}, HTTPStatus.BAD_REQUEST
 
         if User.get_by_username(username):
             return {'message': 'email already used'}, HTTPStatus.BAD_REQUEST
@@ -108,3 +111,37 @@ class UserUpdateResource(Resource):
             "message": "User changed successfully",
             'access_token': access_token
         }, HTTPStatus.OK
+
+class AdminResource(Resource):
+
+    def post(self):
+        json_data = request.get_json()
+
+        username = json_data.get('username')
+        email = json_data.get('email')
+        non_hash_password = json_data.get('password')
+
+        if User.get_by_username(username):
+            return {'message': 'email already used'}, HTTPStatus.BAD_REQUEST
+
+        if User.get_by_email(email):
+            return {'message': 'email already used'}, HTTPStatus.BAD_REQUEST
+
+        password = hash_password(non_hash_password)
+        user = User(
+            username=username,
+            email=email,
+            password=password,
+            role="ADMIN"
+        )
+
+        user.save()
+
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role
+        }
+        access_token = create_access_token(identity=data)
+        return {'access_token': access_token}, HTTPStatus.CREATED

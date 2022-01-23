@@ -7,6 +7,10 @@ from flask import current_app
 
 from alembic import context
 
+from models.event import Event
+
+from models.event_subscription import EventSubscription
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

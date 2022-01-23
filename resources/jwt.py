@@ -19,6 +19,8 @@ class TokenRessource(Resource):
 
         json_data = request.get_json()
 
+        print(json_data)
+
         email = json_data.get('email')
         password = json_data.get('password')
 
