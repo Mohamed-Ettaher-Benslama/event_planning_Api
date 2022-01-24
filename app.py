@@ -34,8 +34,8 @@ def register_extensions(app):
 
 def register_resources(app):
     api = Api(app)
-    api.add_resource(UserListResource, '/registrate')
-    api.add_resource(AdminResource, '/registrate/admin')
+    api.add_resource(UserListResource, '/register')
+    api.add_resource(AdminResource, '/register/admin')
     api.add_resource(TokenRessource, '/login')
     api.add_resource(UserUpdateResource, '/users/update')
     api.add_resource(UserResource, '/users/<string:username>')
