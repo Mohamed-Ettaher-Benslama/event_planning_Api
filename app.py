@@ -50,6 +50,7 @@ def register_resources(app):
     api.add_resource(EventByNameResource, '/events/<string:name>')
 
 
+
 if __name__ == '__main__':
     print(hash_password("admin"))
     app = create_app()
