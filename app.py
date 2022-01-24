@@ -41,6 +41,7 @@ def register_resources(app):
     api.add_resource(UserResource, '/users/<string:username>')
     api.add_resource(MeResource, "/me")
     api.add_resource(RefreshResource, "/refresh")
+
     api.add_resource(RevokeResource, '/revoke')
     api.add_resource(ListEventResource, '/events')
     api.add_resource(ListSubscriptionsResource, '/subscription')
