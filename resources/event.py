@@ -79,15 +79,15 @@ class EventHandlingResource(Resource):
             data = request.get_json()
             if data.get("date") is not None:
                 try:
-                    event.name = datetime.strptime(data.get("date"), "%m/%d/%Y, %H:%M")
+                    event.date = datetime.strptime(data.get("date"), "%m/%d/%Y, %H:%M")
                 except ValueError as err:
                     return {'Message': 'Invalid Date format'}, HTTPStatus.BAD_REQUEST
             if data.get("name") is not None:
                 event.name = data.get("name")
             if data.get("description") is not None:
-                event.name = data.get("description")
+                event.description = data.get("description")
             if data.get("ticket_price") is not None:
-                event.name = data["ticket_price"]
+                event.ticket_price = data["ticket_price"]
             event.save()
             return {'Message': 'Event with id ' + str(id) + ' Updated Successfully'}, HTTPStatus.OK
         else:
