@@ -14,5 +14,5 @@ class DevConfig(Config):
     SECRET_KEY = 'Nequeporroquisquamestquidoloremipsumquiadolorsitametconsecteturadipiscivelit'
 
 class ProdConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL_2')
     SECRET_KEY = os.environ.get('SECRET_KEY')
