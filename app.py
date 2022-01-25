@@ -5,7 +5,6 @@ from config import Config
 from extention import db, jwt
 from utils import hash_password
 from http import HTTPStatus
-
 from resources.user import UserListResource, UserResource, MeResource, UserUpdateResource, AdminResource
 from resources.jwt import TokenRessource, RefreshResource, RevokeResource, black_list
 from resources.event import ListEventResource, EventHandlingResource, EventByNameResource
