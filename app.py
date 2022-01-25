@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
-from config import Config
+
 from extention import db, jwt
 from utils import hash_password
-from http import HTTPStatus
+import os
 from resources.user import UserListResource, UserResource, MeResource, UserUpdateResource, AdminResource
 from resources.jwt import TokenRessource, RefreshResource, RevokeResource, black_list
 from resources.event import ListEventResource, EventHandlingResource, EventByNameResource
@@ -12,8 +12,13 @@ from resources.subscription import SubscriptionHandlingResource, ListSubscriptio
 
 
 def create_app():
+    env = os.environ.get('ENV', 'DEVELOPMENT')
+    if env == 'DEVELOPMENT':
+        config_str = 'config.DevConfig'
+    else:
+        config_str = 'config.ProdConfig'
     application = Flask(__name__)
-    application.config.from_object(Config)
+    application.config.from_object(config_str)
     register_extensions(application)
     register_resources(application)
     return application
